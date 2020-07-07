@@ -79,7 +79,7 @@
 					} else {
 						this.$message.error(res.meta.msg)
 					}
-				}).catch(error => {
+				}).catch(() => {
 					this.$message.error("获取失败")
 				})
 			},
