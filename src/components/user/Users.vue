@@ -41,7 +41,7 @@
 						<el-button type="danger" icon="el-icon-delete" size="mini" @click="removeUserById(scope.row.id)"></el-button>
 						<!--分配角色按钮-->
 						<el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-							<el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+							<el-button type="warning" icon="el-icon-setting" size="mini" @click="showSetRoleDialog(scope.row)"></el-button>
 						</el-tooltip>
 					</template>
 				</el-table-column>
@@ -73,7 +73,7 @@
 				</el-form-item>
 			</el-form>
 			<!--底部-->
-			<span slot="footer" class="dialog-footer">
+			<span slot="footer">
 				<el-button @click="addDialogVisible=false">取 消</el-button>
 				<el-button type="primary" @click="addUser">确 定</el-button>
 			</span>
@@ -94,9 +94,28 @@
 				</el-form-item>
 			</el-form>
 			<!--底部-->
-			<span slot="footer" class="dialog-footer">
+			<span slot="footer">
 				<el-button @click="editDialogVisible=false">取 消</el-button>
 				<el-button type="primary" @click="editUser">确 定</el-button>
+			</span>
+		</el-dialog>
+
+		<!--分配角色的对话框-->
+		<el-dialog title="分配角色" width="50%" :visible.sync="setRoleDialogVisible" :close-on-click-modal="false" @close="setRoleDialogClosed">
+			<!--内容主体-->
+			<div>
+				<p>当前的用户：{{ userInfo.username }}</p>
+				<p>当前的角色：{{ userInfo.role_name }}</p>
+				<p>分配新角色：
+					<el-select v-model="selectRoleId" placeholder="请选择">
+						<el-option v-for="item in rolesList" :key="item.id" :label="item.roleName" :value="item.id"></el-option>
+					</el-select>
+				</p>
+			</div>
+			<!--底部-->
+			<span slot="footer">
+				<el-button @click="setRoleDialogVisible=false">取 消</el-button>
+				<el-button type="primary" @click="saveRoleInfo">确 定</el-button>
 			</span>
 		</el-dialog>
 	</div>
@@ -106,14 +125,14 @@
 	export default {
 		name: "Users",
 		data() {
-			var checkEmail = (rule, value, callback) => {
+			let checkEmail = (rule, value, callback) => {
 				const regEmail = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/
 				if (regEmail.test(value)) {
 					return callback()
 				}
 				callback(new Error('请输入合法的邮箱'))
 			}
-			var checkMobile = (rule, value, callback) => {
+			let checkMobile = (rule, value, callback) => {
 				const regMobile = /^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/
 				if (regMobile.test(value)) {
 					return callback()
@@ -129,8 +148,12 @@
 				},
 				userList: [],
 				total: 0,
-				addDialogVisible: false,//添加用户对话框显示状态
-				editDialogVisible: false,//修改用户对话框显示状态
+				//添加用户对话框显示状态
+				addDialogVisible: false,
+				//修改用户对话框显示状态
+				editDialogVisible: false,
+				//分配角色对话框的显示状态
+				setRoleDialogVisible: false,
 				//添加用户的表单数据
 				addForm: {
 					username: '',
@@ -169,7 +192,13 @@
 						{required: true, message: '请输入手机号', trigger: 'blur'},
 						{validator: checkMobile, trigger: 'blur'}
 					]
-				}
+				},
+				//需要被分配角色的用户信息
+				userInfo: {},
+				//所有角色的数据列表
+				rolesList: [],
+				//已选中的角色id
+				selectRoleId: ''
 			}
 		},
 		created() {
@@ -285,8 +314,8 @@
 					axios.delete(`users/${id}`).then(response => {
 						const res = response.data
 						if (res.meta.status === 200) {
+							this.$message.success(res.meta.msg)
 							this.getUserList()
-							this.$message.success('删除成功!')
 						} else {
 							this.$message.error(res.meta.msg)
 						}
@@ -296,6 +325,44 @@
 				}).catch(() => {
 					this.$message.info('已取消删除')
 				});
+			},
+			//显示分配角色对话框
+			showSetRoleDialog(userInfo) {
+				this.userInfo = userInfo
+				axios.get('roles').then(response => {
+					const res = response.data
+					if (res.meta.status === 200) {
+						this.rolesList = res.data
+					} else {
+						this.$message.error(res.meta.msg)
+					}
+				}).catch(() => {
+					this.$message.error('请求失败')
+				})
+				this.setRoleDialogVisible = true
+			},
+			//分配角色对话框关闭事件
+			setRoleDialogClosed() {
+				this.selectRoleId = ''
+				this.userInfo = {}
+			},
+			//确定分配角色
+			saveRoleInfo() {
+				if (!this.selectRoleId) {
+					return this.$message.error('请选择要分配的角色')
+				}
+				axios.put(`users/${this.userInfo.id}/role`, {rid: this.selectRoleId}).then(response => {
+					const res = response.data
+					if (res.meta.status === 200) {
+						this.getUserList()
+						this.setRoleDialogVisible = false
+						this.$message.success(res.meta.msg)
+					} else {
+						this.$message.error(res.meta.msg)
+					}
+				}).catch(() => {
+					this.$message.error('操作失败')
+				})
 			}
 		}
 	}
