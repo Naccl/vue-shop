@@ -16,27 +16,55 @@
 				</el-col>
 			</el-row>
 
-			<tree-table class="treeTable" :data="cateList" :columns="columns" :selection-type="false" :expand-type="false"
+			<!-- vue-table-with-tree-grid依赖 树形列表 -->
+			<!--<tree-table class="treeTable" :data="cateList" :columns="columns" :selection-type="false" :expand-type="false"
 			            :show-index="true" :border="true" :stripe="false">
-				<!--是否有效-->
+				&lt;!&ndash;是否有效&ndash;&gt;
 				<template slot="isok" slot-scope="scope">
 					<i class="el-icon-success" v-if="scope.row.cat_deleted === false" style="color: lightgreen"></i>
 					<i class="el-icon-error" v-else style="color: red"></i>
 				</template>
-				<!--排序-->
+				&lt;!&ndash;排序&ndash;&gt;
 				<template slot="order" slot-scope="scope">
 					<el-tag size="mini" v-if="scope.row.cat_level===0">一级</el-tag>
 					<el-tag size="mini" type="success" v-else-if="scope.row.cat_level===1">二级</el-tag>
 					<el-tag size="mini" type="warning" v-else>三级</el-tag>
 				</template>
-				<!--操作-->
+				&lt;!&ndash;操作&ndash;&gt;
 				<template slot="opt" slot-scope="scope">
 					<el-button size="mini" type="primary" icon="el-icon-edit" @click="showEditDialog(scope.row)">编辑</el-button>
 					<el-popconfirm title="确定删除吗？" icon="el-icon-delete" iconColor="red" @onConfirm="removeCateById(scope.row.cat_id)">
 						<el-button size="mini" type="danger" icon="el-icon-delete" slot="reference">删除</el-button>
 					</el-popconfirm>
 				</template>
-			</tree-table>
+			</tree-table>-->
+
+			<!-- Element 树形列表 -->
+			<el-table :data="cateList" row-key="cat_id" :tree-props="{children: 'children'}" :border="true" :stripe="true">
+				<el-table-column label="序号" type="index" width="50"></el-table-column>
+				<el-table-column label="分类名称" prop="cat_name"></el-table-column>
+				<el-table-column label="是否有效">
+					<template v-slot="scope">
+						<i class="el-icon-success" v-if="scope.row.cat_deleted === false" style="color: lightgreen"></i>
+						<i class="el-icon-error" v-else style="color: red"></i>
+					</template>
+				</el-table-column>
+				<el-table-column label="排序">
+					<template v-slot="scope">
+						<el-tag size="mini" v-if="scope.row.cat_level===0">一级</el-tag>
+						<el-tag size="mini" type="success" v-else-if="scope.row.cat_level===1">二级</el-tag>
+						<el-tag size="mini" type="warning" v-else>三级</el-tag>
+					</template>
+				</el-table-column>
+				<el-table-column label="操作">
+					<template v-slot="scope">
+						<el-button size="mini" type="primary" icon="el-icon-edit" @click="showEditDialog(scope.row)">编辑</el-button>
+						<el-popconfirm title="确定删除吗？" icon="el-icon-delete" iconColor="red" @onConfirm="removeCateById(scope.row.cat_id)">
+							<el-button size="mini" type="danger" icon="el-icon-delete" slot="reference">删除</el-button>
+						</el-popconfirm>
+					</template>
+				</el-table-column>
+			</el-table>
 
 			<!--分页-->
 			<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="queryInfo.pagenum"
