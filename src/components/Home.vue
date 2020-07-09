@@ -12,7 +12,7 @@
 		<el-container>
 			<!--侧边栏-->
 			<el-aside :width="isCollapse? '64px' : '200px'">
-				<div class="toggle-button" @click="toggleCollapse">|||</div>
+				<div class="toggle-button" @click="isCollapse=!isCollapse"><i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'"></i></div>
 				<!--菜单-->
 				<el-menu background-color="#333744" text-color="#fff" active-text-color="#409eff"
 				         :unique-opened="false" :collapse="isCollapse" :collapse-transition="false"
@@ -83,10 +83,6 @@
 					this.$message.error("获取失败")
 				})
 			},
-			//点击切换菜单的折叠与展开
-			toggleCollapse() {
-				this.isCollapse = !this.isCollapse
-			},
 			//保存链接的激活状态
 			saveNavState(activePath) {
 				this.activePath = activePath
@@ -133,16 +129,16 @@
 	}
 
 	.iconfont {
-		margin-right: 10px;
+		margin-right: 20px;
+		font-size: 20px;
 	}
 
 	.toggle-button {
 		background-color: #4a5064;
-		font-size: 10px;
-		line-height: 24px;
+		font-size: 20px;
+		line-height: 40px;
 		color: #ffffff;
 		text-align: center;
-		letter-spacing: 0.2em;
 		cursor: pointer;
 	}
 </style>
