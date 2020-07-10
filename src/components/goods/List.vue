@@ -16,7 +16,7 @@
 					</el-input>
 				</el-col>
 				<el-col :span="6">
-					<el-button type="primary" @click="">添加商品</el-button>
+					<el-button type="primary" @click="goAddPage">添加商品</el-button>
 				</el-col>
 			</el-row>
 

@@ -19,3 +19,11 @@ body,
     margin-top: 15px;
     margin-bottom: 15px;
 }
+
+.el-steps {
+    margin: 20px 0;
+}
+
+.el-step__title{
+    font-size: 14px;
+}
