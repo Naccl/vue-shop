@@ -39,14 +39,34 @@
 							<el-cascader v-model="addForm.goods_cat" :options="cateList" :props="cascaderProps" @change="handleChange" style="width: 300px"></el-cascader>
 						</el-form-item>
 					</el-tab-pane>
-					<el-tab-pane label="商品参数" name="1">配置管理</el-tab-pane>
-					<el-tab-pane label="商品属性" name="2">角色管理</el-tab-pane>
-					<el-tab-pane label="商品图片" name="3">定时任务补偿</el-tab-pane>
+					<el-tab-pane label="商品参数" name="1">
+						<el-form-item :label="item.attr_name" v-for="item in manyTableData" :key="item.attr_id">
+							<el-checkbox-group v-model="item.attr_vals">
+								<el-checkbox :label="cb" v-for="(cb,index) in item.attr_vals" :key="index" border></el-checkbox>
+							</el-checkbox-group>
+						</el-form-item>
+					</el-tab-pane>
+					<el-tab-pane label="商品属性" name="2">
+						<el-form-item :label="item.attr_name" v-for="item in onlyTableData" :key="item.attr_id">
+							<el-input v-model="item.attr_vals"></el-input>
+						</el-form-item>
+					</el-tab-pane>
+					<el-tab-pane label="商品图片" name="3">
+						<el-upload action="http://127.0.0.1:8888/api/private/v1/upload" :on-preview="handlePreview"
+						           :on-remove="handleRemove" list-type="picture" :headers="headerObj" :on-success="heandleSuccess">
+							<el-button type="primary">点击上传</el-button>
+						</el-upload>
+					</el-tab-pane>
 					<el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
 				</el-tabs>
 			</el-form>
-
 		</el-card>
+
+		<!--图片预览-->
+		<el-dialog title="图片预览" width="50%" :visible.sync="previewDialogVisible" @close="">
+			<!--内容主体-->
+			<img :src="previewPath" alt="" class="previewImg">
+		</el-dialog>
 	</div>
 </template>
 
@@ -69,7 +89,8 @@
 					goods_price: 0,
 					goods_weight: 0,
 					goods_number: 0,
-					goods_cat: []
+					goods_cat: [],
+					pics: []
 				},
 				addFormRules: {
 					goods_name: [
@@ -89,7 +110,17 @@
 					]
 				},
 				//商品参数列表
-				manyTableData: []
+				manyTableData: [],
+				//商品属性列表
+				onlyTableData: [],
+				//图片上传请求头
+				headerObj: {
+					Authorization: window.sessionStorage.getItem('token')
+				},
+				//预览图片url
+				previewPath: '',
+				//图片预览对话框显示状态
+				previewDialogVisible: false
 			}
 		},
 		created() {
@@ -124,10 +155,13 @@
 			//tab标签切换
 			tabClicked() {
 				//访问商品参数tab
-				if (this.activeIndex === 1) {
+				if (this.activeIndex === '1') {
 					axios.get(`categories/${this.cateId}/attributes`, {params: {sel: 'many'}}).then(response => {
 						const res = response.data
 						if (res.meta.status === 200) {
+							res.data.forEach(item => {
+								item.attr_vals = item.attr_vals ? item.attr_vals.split(',') : []
+							})
 							this.manyTableData = res.data
 						} else {
 							this.$message.error(res.meta.msg)
@@ -135,7 +169,38 @@
 					}).catch(() => {
 						this.$message.error('请求失败')
 					})
+				} else if (this.activeIndex === '2') {
+					axios.get(`categories/${this.cateId}/attributes`, {params: {sel: 'only'}}).then(response => {
+						const res = response.data
+						if (res.meta.status === 200) {
+							this.onlyTableData = res.data
+						} else {
+							this.$message.error(res.meta.msg)
+						}
+					}).catch(() => {
+						this.$message.error('请求失败')
+					})
 				}
+			},
+			//图片预览
+			handlePreview(file) {
+				this.previewPath = file.response.data.url
+				this.previewDialogVisible = true
+			},
+			//移除图片
+			handleRemove(file) {
+				const filePath = file.response.data.tmp_path
+				const i = this.addForm.pics.findIndex(x => x.pic === filePath)
+				this.addForm.pics.splice(i, 1)
+			},
+			//图片上传成功hook
+			heandleSuccess(response) {
+				if (response.meta.status === 200) {
+					this.$message.success(response.meta.msg)
+				} else {
+					this.$message.error(response.meta.msg)
+				}
+				this.addForm.pics.push({pic: response.data.tmp_path})
 			}
 		},
 		computed: {
@@ -152,5 +217,13 @@
 <style lang="less" scoped>
 	.el-steps .el-step {
 		flex-basis: 16.6667% !important
+	}
+
+	.el-checkbox {
+		margin: 0 10px 0 0 !important;
+	}
+
+	.previewImg {
+		width: 100%;
 	}
 </style>
