@@ -50,14 +50,15 @@
 					if (valid) {
 						axios.post("login", this.loginForm).then(response => {
 							const res = response.data
-							console.log(res)
 							if (res.meta.status === 200) {
-								this.$message.success('登陆成功');
-								window.sessionStorage.setItem('token',res.data.token)
+								this.$message.success(res.meta.msg);
+								window.sessionStorage.setItem('token', res.data.token)
 								this.$router.push('/home')
 							} else {
-								this.$message.error('登陆失败');
+								this.$message.error(res.meta.msg);
 							}
+						}).catch(() => {
+							this.$message.error('请求失败')
 						})
 					}
 				})
