@@ -50,7 +50,7 @@
 			<!--分页-->
 			<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="queryInfo.pagenum"
 			               :page-sizes="[1, 2, 5, 10]" :page-size="queryInfo.pagesize" :total="total"
-			               layout="total, sizes, prev, pager, next, jumper">
+			               layout="total, sizes, prev, pager, next, jumper" background>
 			</el-pagination>
 		</el-card>
 
