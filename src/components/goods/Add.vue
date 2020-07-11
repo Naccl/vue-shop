@@ -21,7 +21,7 @@
 			</el-steps>
 			<!--tab标签栏-->
 			<el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px" label-position="top">
-				<el-tabs v-model="activeIndex" tab-position="left" :before-leave="beforeTabLeave" @tab-click="tabClicked">
+				<el-tabs v-model="activeIndex" tab-position="left" :before-leave="beforeTabLeave">
 					<el-tab-pane label="基本信息" name="0">
 						<el-form-item label="商品名称" prop="goods_name">
 							<el-input v-model="addForm.goods_name"></el-input>
@@ -40,8 +40,8 @@
 						</el-form-item>
 					</el-tab-pane>
 					<el-tab-pane label="商品参数" name="1">
-						<el-form-item :label="item.attr_name" v-for="item in manyTableData" :key="item.attr_id">
-							<el-checkbox-group v-model="item.attr_vals">
+						<el-form-item :label="item.attr_name" v-for="(item,index) in manyTableData" :key="item.attr_id">
+							<el-checkbox-group v-model="checkedManyTableData[index].attr_vals">
 								<el-checkbox :label="cb" v-for="(cb,index) in item.attr_vals" :key="index" border></el-checkbox>
 							</el-checkbox-group>
 						</el-form-item>
@@ -116,8 +116,10 @@
 						{required: true, message: '请选择商品分类', trigger: 'blur'}
 					]
 				},
-				//商品参数列表
+				//供选择的商品参数列表
 				manyTableData: [],
+				//真正双向绑定的选中的商品参数列表
+				checkedManyTableData: [],
 				//商品属性列表
 				onlyTableData: [],
 				//图片上传请求头
@@ -150,43 +152,42 @@
 			handleChange() {
 				if (this.addForm.goods_cat.length !== 3) {
 					this.addForm.goods_cat = []
+					return
 				}
+				//应该在选择商品分类时获取数据，如果在切换标签时获取，无法保存修改后的数据
+				//获取商品参数数据
+				axios.get(`categories/${this.cateId}/attributes`, {params: {sel: 'many'}}).then(response => {
+					const res = response.data
+					if (res.meta.status === 200) {
+						res.data.forEach(item => {
+							item.attr_vals = item.attr_vals ? item.attr_vals.split(',') : []
+						})
+						this.manyTableData = res.data
+						//深拷贝一份manyTableData
+						this.checkedManyTableData = _.cloneDeep(res.data)
+					} else {
+						this.$message.error(res.meta.msg)
+					}
+				}).catch(() => {
+					this.$message.error('请求失败')
+				})
+				//获取商品属性数据
+				axios.get(`categories/${this.cateId}/attributes`, {params: {sel: 'only'}}).then(response => {
+					const res = response.data
+					if (res.meta.status === 200) {
+						this.onlyTableData = res.data
+					} else {
+						this.$message.error(res.meta.msg)
+					}
+				}).catch(() => {
+					this.$message.error('请求失败')
+				})
 			},
 			//阻止tab标签切换
 			beforeTabLeave(activeName, oldActiveName) {
 				if (oldActiveName === '0' && this.addForm.goods_cat.length !== 3) {
 					this.$message.error('请选择商品分类')
 					return false
-				}
-			},
-			//tab标签切换
-			tabClicked() {
-				//访问商品参数tab
-				if (this.activeIndex === '1') {
-					axios.get(`categories/${this.cateId}/attributes`, {params: {sel: 'many'}}).then(response => {
-						const res = response.data
-						if (res.meta.status === 200) {
-							res.data.forEach(item => {
-								item.attr_vals = item.attr_vals ? item.attr_vals.split(',') : []
-							})
-							this.manyTableData = res.data
-						} else {
-							this.$message.error(res.meta.msg)
-						}
-					}).catch(() => {
-						this.$message.error('请求失败')
-					})
-				} else if (this.activeIndex === '2') {
-					axios.get(`categories/${this.cateId}/attributes`, {params: {sel: 'only'}}).then(response => {
-						const res = response.data
-						if (res.meta.status === 200) {
-							this.onlyTableData = res.data
-						} else {
-							this.$message.error(res.meta.msg)
-						}
-					}).catch(() => {
-						this.$message.error('请求失败')
-					})
 				}
 			},
 			//图片预览
@@ -217,7 +218,7 @@
 						const form = _.cloneDeep(this.addForm)
 						form.goods_cat = form.goods_cat.join(',')
 						//处理商品参数
-						this.manyTableData.forEach(item => {
+						this.checkedManyTableData.forEach(item => {
 							const newInfo = {
 								attr_id: item.attr_id,
 								attr_value: item.attr_vals.join(',')
