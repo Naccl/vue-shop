@@ -24,6 +24,10 @@ body,
     margin: 20px 0;
 }
 
-.el-step__title{
+.el-step__title {
     font-size: 14px;
+}
+
+.ql-editor {
+    min-height: 300px;
 }

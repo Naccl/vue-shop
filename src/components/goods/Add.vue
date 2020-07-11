@@ -53,17 +53,20 @@
 					</el-tab-pane>
 					<el-tab-pane label="商品图片" name="3">
 						<el-upload action="http://127.0.0.1:8888/api/private/v1/upload" :on-preview="handlePreview"
-						           :on-remove="handleRemove" list-type="picture" :headers="headerObj" :on-success="heandleSuccess">
+						           :on-remove="handleRemove" list-type="picture" :headers="headerObj" :on-success="handleSuccess">
 							<el-button type="primary">点击上传</el-button>
 						</el-upload>
 					</el-tab-pane>
-					<el-tab-pane label="商品内容" name="4">定时任务补偿</el-tab-pane>
+					<el-tab-pane label="商品内容" name="4">
+						<quill-editor v-model="addForm.goods_introduce"></quill-editor>
+						<el-button type="primary" class="btnAdd" @click="add">添加商品</el-button>
+					</el-tab-pane>
 				</el-tabs>
 			</el-form>
 		</el-card>
 
 		<!--图片预览-->
-		<el-dialog title="图片预览" width="50%" :visible.sync="previewDialogVisible" @close="">
+		<el-dialog title="图片预览" width="50%" :visible.sync="previewDialogVisible">
 			<!--内容主体-->
 			<img :src="previewPath" alt="" class="previewImg">
 		</el-dialog>
@@ -71,6 +74,8 @@
 </template>
 
 <script>
+	import _ from 'lodash'
+
 	export default {
 		name: "Add",
 		data() {
@@ -90,7 +95,9 @@
 					goods_weight: 0,
 					goods_number: 0,
 					goods_cat: [],
-					pics: []
+					pics: [],
+					goods_introduce: '',
+					attrs: []
 				},
 				addFormRules: {
 					goods_name: [
@@ -194,13 +201,53 @@
 				this.addForm.pics.splice(i, 1)
 			},
 			//图片上传成功hook
-			heandleSuccess(response) {
+			handleSuccess(response) {
 				if (response.meta.status === 200) {
 					this.$message.success(response.meta.msg)
 				} else {
 					this.$message.error(response.meta.msg)
 				}
 				this.addForm.pics.push({pic: response.data.tmp_path})
+			},
+			//添加商品
+			add() {
+				this.$refs.addFormRef.validate(valid => {
+					if (valid) {
+						//深拷贝一份form表单数据
+						const form = _.cloneDeep(this.addForm)
+						form.goods_cat = form.goods_cat.join(',')
+						//处理商品参数
+						this.manyTableData.forEach(item => {
+							const newInfo = {
+								attr_id: item.attr_id,
+								attr_value: item.attr_vals.join(',')
+							}
+							form.attrs.push(newInfo)
+						})
+						//处理商品属性
+						this.onlyTableData.forEach(item => {
+							const newInfo = {
+								attr_id: item.attr_id,
+								attr_value: item.attr_vals
+							}
+							form.attrs.push(newInfo)
+						})
+
+						axios.post('goods', form).then(response => {
+							const res = response.data
+							if (res.meta.status === 201) {
+								this.$message.success(res.meta.msg)
+								this.$router.push('/goods')
+							} else {
+								this.$message.error(res.meta.msg)
+							}
+						}).catch(() => {
+							this.$message.error('操作失败')
+						})
+					} else {
+						return this.$message.error('请填写必要的表单项')
+					}
+				})
 			}
 		},
 		computed: {
@@ -225,5 +272,9 @@
 
 	.previewImg {
 		width: 100%;
+	}
+
+	.btnAdd {
+		margin-top: 15px;
 	}
 </style>
