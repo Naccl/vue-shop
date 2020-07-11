@@ -14,7 +14,7 @@
 			<el-aside :width="isCollapse? '64px' : '200px'">
 				<div class="toggle-button" @click="isCollapse=!isCollapse"><i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'"></i></div>
 				<!--菜单-->
-				<el-menu background-color="#333744" text-color="#fff" active-text-color="#409eff"
+				<el-menu background-color="#333744" text-color="#fff" active-text-color="#409eff" :default-openeds="defaultOpeneds"
 				         :unique-opened="false" :collapse="isCollapse" :collapse-transition="false"
 				         :router="true" :default-active="activePath">
 					<!-- 一级菜单 -->
@@ -25,7 +25,7 @@
 							<span>{{ item.authName }}</span>
 						</template>
 						<!-- 二级菜单 -->
-						<el-menu-item :index="subItem.path" v-for="subItem in item.children" :key="subItem.id" @click="saveNavState(subItem.path)">
+						<el-menu-item :index="'/'+subItem.path" v-for="subItem in item.children" :key="subItem.id" @click="saveNavState('/'+subItem.path)">
 							<template slot="title">
 								<i class="el-icon-menu"></i>
 								<span>{{ subItem.authName }}</span>
@@ -58,7 +58,9 @@
 				//是否折叠
 				isCollapse: false,
 				//被激活的链接地址
-				activePath: ''
+				activePath: '',
+				//默认打开的菜单
+				defaultOpeneds: []
 			}
 		},
 		created() {
@@ -75,6 +77,9 @@
 				axios.get('menus').then(response => {
 					const res = response.data
 					if (res.meta.status === 200) {
+						res.data.forEach(item => {
+							this.defaultOpeneds.push('' + item.id)
+						})
 						this.menulist = res.data
 					} else {
 						this.$message.error(res.meta.msg)

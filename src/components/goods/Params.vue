@@ -4,7 +4,7 @@
 		<el-breadcrumb separator-class="el-icon-arrow-right">
 			<el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
 			<el-breadcrumb-item>商品管理</el-breadcrumb-item>
-			<el-breadcrumb-item>参数列表</el-breadcrumb-item>
+			<el-breadcrumb-item>分类参数</el-breadcrumb-item>
 		</el-breadcrumb>
 
 		<el-card>
@@ -309,11 +309,7 @@
 		},
 		computed: {
 			isBtnDisabled() {
-				if (this.selectedKeys.length === 3) {
-					return false
-				} else {
-					return true
-				}
+				return this.selectedKeys.length !== 3;
 			},
 			//当前选中的三级分类的id
 			cateId() {
