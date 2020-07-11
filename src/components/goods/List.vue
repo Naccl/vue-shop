@@ -31,7 +31,7 @@
 				</el-table-column>
 				<el-table-column label="操作" width="200">
 					<template v-slot="scope">
-						<el-button type="primary" icon="el-icon-edit" size="mini" @click="">编辑</el-button>
+						<el-button type="primary" icon="el-icon-edit" size="mini" @click="goEditPage(scope.row.goods_id)">编辑</el-button>
 						<el-popconfirm title="确定删除吗？" icon="el-icon-delete" iconColor="red" @onConfirm="removeById(scope.row.goods_id)">
 							<el-button size="mini" type="danger" icon="el-icon-delete" slot="reference">删除</el-button>
 						</el-popconfirm>
@@ -105,6 +105,9 @@
 			},
 			goAddPage(){
 				this.$router.push('/goods/add')
+			},
+			goEditPage(id){
+				this.$router.push(`/goods/edit/${id}`)
 			}
 		}
 	}
