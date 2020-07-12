@@ -24,6 +24,7 @@
     "@vue/cli-plugin-vuex": "~4.4.0",
     "@vue/cli-service": "~4.4.0",
     "axios": "^0.18.0",
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "less-loader": "^6.2.0",
     "vue-cli-plugin-axios": "0.0.4",
     "vue-cli-plugin-element": "^1.0.1",
