@@ -92,6 +92,10 @@ const router = new VueRouter({
 	routes
 })
 
+const originalPush = VueRouter.prototype.push;
+VueRouter.prototype.push = function(location) {
+	return originalPush.call(this, location).catch(err => err)
+}
 
 //挂载路由导航守卫
 router.beforeEach((to, from, next) => {
