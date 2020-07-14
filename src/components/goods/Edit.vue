@@ -251,7 +251,7 @@
 							form.attrs.push(newInfo)
 						})
 
-						axios.put(`goods/${this.editForm.goods_id}`, form).then(response => {
+						axios.put(`http://127.0.0.1:8888/api/private/v1/goods/${this.editForm.goods_id}`, form).then(response => {
 							const res = response.data
 							if (res.meta.status === 200) {
 								this.$message.success(res.meta.msg)

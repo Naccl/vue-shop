@@ -234,7 +234,7 @@
 							form.attrs.push(newInfo)
 						})
 
-						axios.post('goods', form).then(response => {
+						axios.post('http://127.0.0.1:8888/api/private/v1/goods', form).then(response => {
 							const res = response.data
 							if (res.meta.status === 201) {
 								this.$message.success(res.meta.msg)
