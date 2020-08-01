@@ -220,7 +220,7 @@
 				})
 			},
 			showEditDialog(paramsInfo) {
-				//paramsInfo中没有对象，直接浅拷贝一份，也没必要从服务端重新获取了
+				//paramsInfo中没有对象，直接深拷贝一份，也没必要从服务端重新获取了
 				//如果直接赋值，则为引用，表格上的数据也会随对话框中数据的修改而实时改变
 				this.editForm = {...paramsInfo}
 				this.editDialogVisible = true
