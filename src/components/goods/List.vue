@@ -8,6 +8,7 @@
 		</el-breadcrumb>
 
 		<el-card>
+			<el-alert title="注意：服务端暂不提供图片上传、商品添加、编辑的提交功能，如需测试，可在本地8888端口自启服务端，具体参考Network Request URL！" type="warning" :closable="false" show-icon></el-alert>
 			<!--搜索与添加-->
 			<el-row :gutter="10">
 				<el-col :span="6">
@@ -90,7 +91,7 @@
 				this.queryInfo.pagenum = newPage
 				this.getGoodsList()
 			},
-			removeById(id){
+			removeById(id) {
 				axios.delete(`goods/${id}`).then(response => {
 					const res = response.data
 					if (res.meta.status === 200) {
@@ -103,10 +104,10 @@
 					this.$message.error("操作失败")
 				})
 			},
-			goAddPage(){
+			goAddPage() {
 				this.$router.push('/goods/add')
 			},
-			goEditPage(id){
+			goEditPage(id) {
 				this.$router.push(`/goods/edit/${id}`)
 			}
 		}
@@ -116,5 +117,9 @@
 <style lang="less" scoped>
 	.el-button {
 		margin-right: 10px;
+	}
+
+	.el-alert {
+		margin-bottom: 15px;
 	}
 </style>
